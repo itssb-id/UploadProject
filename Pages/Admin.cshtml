@@ -1,0 +1,194 @@
+﻿@page "{adminID}"
+@model UploadProject.Pages.AdminModel
+@{ 
+}
+
+
+ 
+<div class="d-flex flex-column w-100">
+    <h1 class="mt-5">Admin</h1>
+
+    <div class="d-flex flex-row-reverse bd-highlight">
+        <div class="p-2 bd-highlight">
+            <p>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseTestProjects" role="button" aria-expanded="true" aria-controls="collapseTestProjects">
+                    Test Projects
+                </a>
+            </p>
+        </div>
+        <div class="p-2 bd-highlight">
+            <p>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="true" aria-controls="collapseExample">
+                    <i class="bx bx-upload me-2"></i>
+                    Upload Test Project
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="collapse" id="collapseExample">
+        <form method="post" enctype="multipart/form-data">
+            <input class="visually-hidden" type="text" asp-for="AdminID" value="@Model.Admin.ID" />
+            <div class="card card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <p>Session Name</p>
+                        <input class="form-control" asp-for="SessionName" autocomplete="on" aria-required="true" placeholder="Session Name" required />
+                    </div>
+                </div>
+                <div class="row align-items-center mt-3">
+                    <div class="col">
+                        <p>Choose Test Project</p>
+                        <input class="form-control" asp-for="UploadedFile" id="formFileSm" type="file" accept=".zip" required />
+                    </div>
+                    <div class="col">
+                        <p>Day Number</p>
+                        <input asp-for="DayNumber" class="form-control" id="formFileSm" min="1" type="number" max="10" required />
+                    </div>
+                </div>
+                <div class="row align-items-center mt-3">
+                    <div class="col">
+                        <p>Start Date</p>
+                        <input asp-for="StartDate" class="form-control" id="formFileSm" type="datetime-local" required />
+                    </div>
+                    <div class="col">
+                        <p>End Date</p>
+                        <input asp-for="EndDate" class="form-control" id="formFileSm" type="datetime-local" required />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class=" btn btn-secondary" type="submit" value="add">
+                            <i class="bx bx-upload me-2"></i>
+                            Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="collapse mt-3" id="collapseTestProjects">
+        <div class="card card-body">
+            <table class="mt-3 table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Test Poject Zip</th>
+                        <th scope="col">Start Date</th>
+                        <th class="text-center" scope="col">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody class="table-group-divider">
+                    @foreach (var item in Model.CompetitionSessions)
+                    {
+                        <tr>
+                            <th>@item.Name</th>
+                            <td>@item.StartDateTime.ToString("dd MMMM yyyy HH:mm tt")</td>
+                            <form method="post">
+                            <td class="text-center">
+                                <input class="visually-hidden" type="text" asp-for="ModuleID" value="@item.ID" />
+                                    @*<Button class="btn btn-warning" type="submit" name="action" value="edit">Edit</Button>*@
+                                @*<Button class="btn btn-danger" type="submit" name="action" value="delete">Delete</Button>*@
+                                <Button class="btn btn-success" type="submit" name="action" value="download">Download</Button>
+                            </td>
+                            </form>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    @foreach (var user in Model.Users)
+    {
+        <div class="card mt-3">
+            <div class="card-body">
+                <a class="d-flex align-items-center justify-content-between text-decoration-none text-black" data-bs-toggle="collapse" href="#collapseHistory-@(user.ID)" role="button" aria-expanded="true">
+                    <h5>@user.Username</h5>
+                    <i class="bx bx-chevron-down fs-4 text-primary"></i>
+                </a>
+                <div class="collapse show mt-3 " id="collapseHistory-@(user.ID)">
+                    @{
+                        var competitionDayList = Model.CompetitionSessions.GroupBy(x => x.DayNumber).Select(x => new
+                        {
+                            DayNumber = x.Key,
+                            Sessions = x.Select(y => new
+                            {
+                                y.ID,
+                                y.Name,
+                                y.StartDateTime,
+                                y.EndDateTime
+                            }).OrderBy(y => y.StartDateTime).ToList()
+                        }).ToList();
+
+                        for (int i = 0; i < competitionDayList.Count; i++)
+                        {
+                            var competitionDay = competitionDayList[i];
+
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <a class="d-flex align-items-center justify-content-between text-decoration-none text-black" data-bs-toggle="collapse" href="#collapseDay-@(user.ID)-@(competitionDay.DayNumber)" role="button" aria-expanded="true" aria-controls="collapseDay@(competitionDay.DayNumber)">
+                                        <span>Day @competitionDay.DayNumber</span>
+                                        <i class="bx bx-chevron-down fs-4 text-primary"></i>
+                                    </a>
+
+                                    <div class="collapse show mt-3" id="collapseDay-@(user.ID)-@(competitionDay.DayNumber)">
+                                        @foreach (var session in competitionDay.Sessions)
+                                        {
+                                            var competitorUploadedFile = Model.CompetitorUploadedFiles.Where(x => x.CompetitionSessionID == session.ID && x.UserID == user.ID).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+
+                                            <div class="ms-3 mb-3">
+                                                <p class="fw-bold">
+                                                    @session.Name
+                                                    <span class="text-muted fw-normal">(@session.StartDateTime.ToString("dd MMM yyyy HH:mm") - @session.EndDateTime.ToString("dd MMM yyyy HH:mm"))</span>
+                                                </p>
+
+                                                @if (competitorUploadedFile != null)
+                                                {
+                                                    var listExtract = Model.CompetitorAnswerHistory.Where(x =>
+                                                        x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID
+                                                        &&
+                                                        x.UserId == user.ID
+                                                    ).FirstOrDefault().UploadedFileZipExtractList;
+
+                                                    <div class="d-flex justify-content-between ms-3 pe-3">
+                                                        <span class="d-inline-flex">@competitorUploadedFile.FileName</span>
+                                                        <span class="d-inline-flex text-muted fst-italic">Last Uploaded (@competitorUploadedFile.CreatedAt)</span>
+                                                    </div>
+
+                                                    <div class="ms-3 mt-3">
+                                                        <ul class="list-group mt-2 me-3">
+                                                            @foreach (var itemExtract in listExtract)
+                                                            {
+                                                                <li class="mb-0 list-group-item">@itemExtract</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="row ms-3">
+                                                        <span class="text-muted fw-light fst-italic">No history</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["alertMessage"] != null)
+    {
+        <script>
+            alert('@TempData["alertMessage"]');
+        </script>
+    }
+</div>

@@ -1,0 +1,19 @@
+﻿@page
+@model UploadProject.Pages.AddUserModel
+@{
+}
+
+<h3 class="mt-5">Add New User </h3>
+<p class="text-muted mb-5">Fill in below information to add new user</p>
+
+<form class="form" method="post" >
+    <div class="form-floating mb-3">
+        <input placeholder="Username" class="form-control" asp-for="Username" />
+        <label asp-for="Username">Username</label>
+    </div>
+    <div class="form-floating mb-3">
+        <input placeholder="Password" class="form-control" asp-for="Password" />
+        <label asp-for="Password">Password</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

@@ -1,0 +1,67 @@
+﻿@{
+    var cookies = Context.Request.Cookies.TryGetValue("UserID", out string? value);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @*<title>@ViewData["Title"] - UploadProject</title>*@
+    <title>LKSProvinsi - UploadProject</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/UploadProject.styles.css" asp-append-version="true" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="d-flex flex-column m-0 min-vh-100">
+    <header class="d-flex flex-column">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">UploadProject</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="d-flex flex-grow-1 justify-content-between">
+                    <div class="d-inline-flex p-1">
+                        <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                    </div>
+                    <div class="d-inline-flex p-1">
+                        @if (!cookies)
+                        {
+                            <a class="nav-link d-flex align-items-center text-primary" asp-page="/Login">
+                                <i class="bx bx-user d-inline-flex me-2"></i>
+                                <span>Login</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="nav-link d-flex align-items-center text-danger" asp-page="/Logout">
+                                <i class="bx bx-log-out d-inline-flex me-2"></i>
+                                <span>Logout</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container d-flex flex-grow-1 align-items-center justify-content-center overflow-visible py-5">
+        @RenderBody()
+    </div>
+
+    <footer class="d-flex border-top py-3 text-muted">
+        <div class="container">
+            &copy; 2023 - UploadProject </a>
+            <!-- - <a asp-area="" asp-page="/Privacy">Privacy -->
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
