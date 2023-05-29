@@ -1,37 +1,111 @@
 ﻿@page "{competitorID}"
+@using System.IO.Compression;
 @model UploadProject.Pages.CompetitorModel
 @{
-    
-} 
+
+}
 
 <div class="d-flex w-100">
     <div class="row w-100">
         <div class="col-lg-12">
             <h1>Competitor - @Model.Competitor?.Username</h1>
-            <p class="mt-3 text-black-50">Download the test projects here</p>
+            @{
+                var currSession = Model.db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => x.StartDateTime <= DateTime.Now && DateTime.Now <= x.EndDateTime);
 
-            <form method="post">
-                <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor?.ID" required>
-                <input class="form-control visually-hidden" asp-for="Action" type="text" value="DownloadTP" required>
-                <button class="btn btn-primary" type="submit">
-                    <i class="bx bx-download me-2"></i>
-                    Download Test Project
-                </button>
-            </form>
+                if (currSession != null)
+                {
+                    <h2>Current Session: @("D" + currSession.DayNumber) @currSession.Name</h2>
+                    <div class="d-flex justify-content-between">
+                        <h4>@currSession.StartDateTime.ToString("dd MMM yyyy HH:mm") - @currSession.EndDateTime.ToString("dd MMM yyyy HH:mm")</h4>
+                        <h4 id="timeOut"></h4>
+                        <script type="text/javascript">
+                            const timeout = document.getElementById("timeOut");
+                            const dueTime = new Date("@currSession.EndDateTime");
+                            const countdown = setInterval(() => {
+                                const now = new Date();
 
-            <p class="mt-5 fw-bold">Upload Answers</p>
-            <form method="post" enctype="multipart/form-data">
-                <div class="d-flex align-items-center">
-                    <div class="d-inline-flex flex-grow-1">
+                                const dist = dueTime - now;
+                                if (dist <= 0) {
+                                    clearInterval(countdown);
+                                    timeout.innerHTML = "EXPIRED!";
+                                    return;
+                                }
+                                //timeout.innerHTML = "" + ;
+
+                                const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                                const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                                const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+
+                                // Display the result in the element with id="demo"
+                                timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + "h " : ""}${dist > (1000 * 60) ? minutes + "m " : ""}${seconds}s`;
+                            }, 1000)
+                        </script>
+                    </div>
+                    <p class="mt-3 text-black-50">Download the test projects here</p>
+
+                    <form method="post">
                         <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor?.ID" required>
-                        <input class="form-control visually-hidden" asp-for="Action" type="text" value="UploadAnswer" required>
-                        <input class="form-control me-3" asp-for="UploadedFile" type="file" accept=".zip" required>
-                    </div>
-                    <div class="d-inline-flex">
-                        <button class=" btn btn-secondary" type="submit"><i class="bx bx-upload me-2"></i>Upload</button>
-                    </div>
-                </div>
-            </form>
+                        <input class="form-control visually-hidden" asp-for="Action" type="text" value="DownloadTP" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bx bx-download me-2"></i>
+                            Download Test Project
+                        </button>
+                    </form>
+
+                    <p class="mt-5 fw-bold">Upload Answers</p>
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="d-flex align-items-center">
+                            <div class="d-inline-flex flex-grow-1">
+                                <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor?.ID" required>
+                                <input class="form-control visually-hidden" asp-for="Action" type="text" value="UploadAnswer" required>
+                                <input class="form-control me-3" asp-for="UploadedFile" type="file" accept=".zip" required>
+                            </div>
+                            <div class="d-inline-flex">
+                                <button class=" btn btn-secondary" type="submit"><i class="bx bx-upload me-2"></i>Upload</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    var nextSession = Model.db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => DateTime.Now <= x.StartDateTime);
+                    if (nextSession != null)
+                    {
+                        <h2>
+                            Next Session: @(
+                "D" + nextSession.DayNumber
+                    ) @nextSession.Name
+                        </h2>
+                        <div class="d-flex justify-content-between">
+                            <h4>@nextSession.StartDateTime.ToString("dd MMM yyyy HH:mm") - @nextSession.EndDateTime.ToString("dd MMM yyyy HH:mm")</h4>
+                            <h4 id="timeOutNext"></h4>
+                            <script type="text/javascript">
+                                const timeout = document.getElementById("timeOutNext");
+                                const dueTime = new Date("@nextSession.StartDateTime");
+                                const countdown = setInterval(() => {
+                                    const now = new Date();
+                                    const dist = dueTime - now; 
+                                    if (dist <= 0) {
+                                        clearInterval(countdown);
+                                        location.reload();
+                                        return;
+                                    }
+
+                                    const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+
+                                    // Display the result in the element with id="demo"
+                                    timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + "h " : ""}${dist > (1000 * 60) ? minutes + "m " : ""}${seconds}s`;
+                                }, 1000)
+                            </script>
+                        </div>
+                    }
+                }
+            }
+
         </div>
         <div class="col-lg-12">
             <p class="mt-5 fw-bold">Answer Histories</p>
@@ -82,10 +156,41 @@
 
                                             <div class="ms-3 mt-3">
                                                 <ul class="list-group mt-2 me-3">
-                                                    @foreach (var itemExtract in listExtract)
-                                                    {
-                                                        <li class="mb-0 list-group-item">@itemExtract</li>
+                                                    @{
+                                                        string huminizerSize(long size)
+                                                        {
+                                                            if (size > 1024 * 1024)
+                                                            {
+                                                                return $"{size / (1024 * 1024)}M";
+                                                            }
+                                                            else if (size > 1024)
+                                                            {
+                                                                return $"{size / (1024)}K";
+                                                            }
+                                                            else
+                                                            {
+                                                                return size.ToString();
+                                                            }
+                                                        }
+                                                        try
+                                                        {
+                                                            using var zipfile = ZipFile.OpenRead(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "File", competitorUploadedFile.FileName));
+                                                            foreach (var itemExtract in zipfile.Entries)
+                                                            {
+                                                                <li class="mb-0 list-group-item d-flex justify-content-between align-items-start">
+                                                                    <div>@itemExtract.FullName</div>
+                                                                    <span class="badge bg-primary rounded-pill">@huminizerSize(itemExtract.CompressedLength) / @huminizerSize(itemExtract.Length)</span>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        catch (FileNotFoundException)
+                                                        {
+                                                            <li class="mb-0 list-group-item">
+                                                                Not found.
+                                                            </li>
+                                                        }
                                                     }
+
                                                 </ul>
                                             </div>
                                         }
@@ -116,14 +221,14 @@
 
 @*<table class="table">
     <thead>
-    <tr>  
+    <tr>
     </tr>
     </thead>
     <tbody>
             @foreach(string a in Model.strings) {
                 <tr>
                     <td>@a</td>
-                </tr> 
+                </tr>
             }
     </tbody>
 </table>*@

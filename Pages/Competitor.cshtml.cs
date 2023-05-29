@@ -24,7 +24,7 @@ namespace UploadProject.Pages
         public List<CompetitorUploadedFile> CompetitorUploadedFiles = new List<CompetitorUploadedFile>();
         public List<CompetitorAnswerHistory> CompetitorAnswerHistory = new List<CompetitorAnswerHistory>();
 
-        private readonly ApplicationDbContext db;
+        public readonly ApplicationDbContext db;
         //private readonly IWebHostEnvironment _env;
 
         public CompetitorModel(ApplicationDbContext _db)
