@@ -76,8 +76,12 @@ namespace UploadProject.Pages
                 var pathFile = Path.Combine(folderPath, x.FileName);
                 if (System.IO.File.Exists(pathFile))
                 {
-                    using ZipArchive archive = ZipFile.OpenRead(pathFile);
-                    listExtract.AddRange(archive.Entries.Select(x => x.FullName));
+                    try
+                    {
+                        using ZipArchive archive = ZipFile.OpenRead(pathFile);
+                        listExtract.AddRange(archive.Entries.Select(x => x.FullName));
+                    }
+                    catch (Exception) { }
                 }
 
                 return new CompetitorAnswerHistory()

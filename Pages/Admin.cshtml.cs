@@ -9,12 +9,12 @@ namespace UploadProject.Pages
 {
     public class AdminModel : PageModel
     {
-        public List<string> strings = new List<string>();
-        private ApplicationDbContext db;
+        public List<string> strings = new();
+        public readonly ApplicationDbContext db;
         public List<User> Users = new();
-        public List<CompetitionSession> CompetitionSessions = new List<CompetitionSession>();
-        public List<CompetitorUploadedFile> CompetitorUploadedFiles = new List<CompetitorUploadedFile>();
-        public List<CompetitorAnswerHistory> CompetitorAnswerHistory = new List<CompetitorAnswerHistory>();
+        public List<CompetitionSession> CompetitionSessions = new();
+        public List<CompetitorUploadedFile> CompetitorUploadedFiles = new();
+        public List<CompetitorAnswerHistory> CompetitorAnswerHistory = new();
 
         [BindProperty]
         public string SelectedID { get; set; } = "";
@@ -95,8 +95,12 @@ namespace UploadProject.Pages
                 var filePath = Path.Combine(folderPath, x.FileName);
                 if (System.IO.File.Exists(filePath))
                 {
-                    using ZipArchive archive = ZipFile.OpenRead(filePath);
-                    listExtract.AddRange(archive.Entries.Select(x => x.FullName));
+                    try
+                    {
+                        using ZipArchive archive = ZipFile.OpenRead(filePath);
+                        listExtract.AddRange(archive.Entries.Select(x => x.FullName));
+                    }
+                    catch (Exception) { }
                 }
 
                 return new CompetitorAnswerHistory()

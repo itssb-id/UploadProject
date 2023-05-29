@@ -1,10 +1,11 @@
 ﻿@page "{adminID}"
+@using System.IO.Compression;
 @model UploadProject.Pages.AdminModel
-@{ 
+@{
 }
 
 
- 
+
 <div class="d-flex flex-column w-100">
     <h1 class="mt-5">Admin</h1>
 
@@ -89,7 +90,7 @@
                             <td class="text-center">
                                 <input class="visually-hidden" type="text" asp-for="ModuleID" value="@item.ID" />
                                     @*<Button class="btn btn-warning" type="submit" name="action" value="edit">Edit</Button>*@
-                                @*<Button class="btn btn-danger" type="submit" name="action" value="delete">Delete</Button>*@
+                                    @*<Button class="btn btn-danger" type="submit" name="action" value="delete">Delete</Button>*@
                                 <Button class="btn btn-success" type="submit" name="action" value="download">Download</Button>
                             </td>
                             </form>
@@ -97,6 +98,71 @@
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            @{
+                var data = Model.db.CompetitionSessions.OrderBy(x => x.DayNumber).ThenBy(x => x.StartDateTime).ToList();
+                int loop = 0;
+            }
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                @foreach (var session in data)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link @(loop == 0 ? "active" : "")" data-bs-toggle="pill" data-bs-target="@("#pills-" + session.Name)" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">@("D" + session.DayNumber) @session.Name</button>
+                    </li>
+                    loop++;
+                }
+            </ul>
+            <div class="tab-content">
+                @{
+                    var loop1 = 0;
+                }
+                @foreach (var session in data)
+                {
+                    <div class="tab-pane fade @(loop1 == 0 ? "show active" : "")" id="@("pills-"+session.Name)" role="tabpanel">
+                        <div>@session.StartDateTime - @session.EndDateTime</div>
+
+                        <div class="row">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                            <div class="col">
+                                <ul class="list-group mt-2">
+                                    @foreach (var index in Enumerable.Range(i*10 + 1, 10))
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-start @(index%2==0?"list-group-item-dark" : "")">
+                                            <div>@($"PC{index:00}")</div>
+                                            @try
+                                            {
+                                                var upload = Model.db.CompetitorUploadedFiles.OrderByDescending(x => x.CreatedAt).FirstOrDefault(a => a.User.Username == $"PC{index:00}" && a.CompetitionSessionID == session.ID);
+                                                using var zipfile = ZipFile.OpenRead(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "File", upload.FileName));
+                                                <span class="badge bg-primary rounded-pill" title="@upload?.CreatedAt">@zipfile.Entries.Count</span>
+                                            }
+                                            catch (FileNotFoundException)
+                                            {
+                                                <span class="badge bg-danger rounded-pill">File Not Found</span>
+                                            }
+                                            catch (InvalidDataException)
+                                            {
+                                                <span class="badge bg-danger rounded-pill">Invalid File Format</span>
+                                            }
+                                            catch (NullReferenceException)
+                                            {
+                                                <span class="badge bg-warning rounded-pill">0</span>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            }
+                        </div>
+                        
+                    </div>
+                    loop1++;
+                }
+            </div>
         </div>
     </div>
 
@@ -148,9 +214,9 @@
                                                 @if (competitorUploadedFile != null)
                                                 {
                                                     var listExtract = Model.CompetitorAnswerHistory.Where(x =>
-                                                        x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID
-                                                        &&
-                                                        x.UserId == user.ID
+                                                    x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID
+                                                    &&
+                                                    x.UserId == user.ID
                                                     ).FirstOrDefault().UploadedFileZipExtractList;
 
                                                     <div class="d-flex justify-content-between ms-3 pe-3">
