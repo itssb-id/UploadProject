@@ -134,7 +134,7 @@
                                         <i class="bx bx-chevron-down fs-4 text-primary"></i>
                                     </a>
 
-                                    <div class="collapse show mt-3" id="collapseDay-@(user.ID)-@(competitionDay.DayNumber)">
+                                    <div class="collapse mt-3" id="collapseDay-@(user.ID)-@(competitionDay.DayNumber)">
                                         @foreach (var session in competitionDay.Sessions)
                                         {
                                             var competitorUploadedFile = Model.CompetitorUploadedFiles.Where(x => x.CompetitionSessionID == session.ID && x.UserID == user.ID).OrderByDescending(x => x.CreatedAt).FirstOrDefault();

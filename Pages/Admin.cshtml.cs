@@ -92,13 +92,11 @@ namespace UploadProject.Pages
             this.CompetitorAnswerHistory = this.CompetitorUploadedFiles.Select((x) =>
             {
                 var listExtract = new List<string>();
-
-                using (ZipArchive archive = ZipFile.OpenRead(Path.Combine(folderPath, x.FileName)))
+                var filePath = Path.Combine(folderPath, x.FileName);
+                if (System.IO.File.Exists(filePath))
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
-                    {
-                        listExtract.Add(entry.FullName);
-                    }
+                    using ZipArchive archive = ZipFile.OpenRead(filePath);
+                    listExtract.AddRange(archive.Entries.Select(x => x.FullName));
                 }
 
                 return new CompetitorAnswerHistory()
@@ -139,7 +137,7 @@ namespace UploadProject.Pages
                     var fileContentType = "application/zip"; // set the content type to indicate a zip file
                     var compressedFileName = $"{Path.GetFileNameWithoutExtension(filePath)}";
                     return PhysicalFile(filePath, fileContentType);
-                
+
             }
 
 

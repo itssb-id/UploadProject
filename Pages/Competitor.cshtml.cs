@@ -11,20 +11,20 @@ namespace UploadProject.Pages
     public class CompetitorModel : PageModel
     {
         [BindProperty]
-        public string CompetitorID { get; set; }
+        public string CompetitorID { get; set; } = string.Empty;
 
         [BindProperty]
-        public IFormFile UploadedFile { get; set; }
+        public IFormFile? UploadedFile { get; set; }
 
         [BindProperty]
-        public string Action { get; set; }
+        public string Action { get; set; } = string.Empty;
 
-        public User Competitor;
+        public User? Competitor;
         public List<CompetitionSession> CompetitionSessions = new List<CompetitionSession>();
         public List<CompetitorUploadedFile> CompetitorUploadedFiles = new List<CompetitorUploadedFile>();
         public List<CompetitorAnswerHistory> CompetitorAnswerHistory = new List<CompetitorAnswerHistory>();
 
-        private ApplicationDbContext db;
+        private readonly ApplicationDbContext db;
         //private readonly IWebHostEnvironment _env;
 
         public CompetitorModel(ApplicationDbContext _db)
@@ -73,13 +73,11 @@ namespace UploadProject.Pages
             this.CompetitorAnswerHistory = this.CompetitorUploadedFiles.Select((x) =>
             {
                 var listExtract = new List<string>();
-
-                using (ZipArchive archive = ZipFile.OpenRead(Path.Combine(folderPath, x.FileName)))
+                var pathFile = Path.Combine(folderPath, x.FileName);
+                if (System.IO.File.Exists(pathFile))
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
-                    {
-                        listExtract.Add(entry.FullName);
-                    }
+                    using ZipArchive archive = ZipFile.OpenRead(pathFile);
+                    listExtract.AddRange(archive.Entries.Select(x => x.FullName));
                 }
 
                 return new CompetitorAnswerHistory()
@@ -116,7 +114,7 @@ namespace UploadProject.Pages
             {
                 var allActiveCompetitionSessions = db.CompetitionSessions.Where(x => DateTime.Now >= x.StartDateTime && DateTime.Now <= x.EndDateTime).ToList();
 
-                if(allActiveCompetitionSessions.Count == 0)
+                if (allActiveCompetitionSessions.Count == 0)
                 {
                     TempData["ErrorMessage"] = "There are no active competition sessions";
                     return Redirect("/Competitor/" + this.Competitor.ID);
@@ -147,7 +145,7 @@ namespace UploadProject.Pages
                     return File(memoryStream.ToArray(), "application/zip", $"Cases-{DateTime.Now.ToString("yyyy-MM-dd_HH:mm:ss")}.zip");
                 }
             }
-            else if(this.Action == "UploadAnswer")
+            else if (this.Action == "UploadAnswer")
             {
                 if (!UploadedFile.FileName.Contains(".zip"))
                     return Page();
@@ -176,7 +174,7 @@ namespace UploadProject.Pages
                 var activeCompetitionSessionID = activeCompetitionSession.ID;
 
                 var fileExtension = Path.GetExtension(UploadedFile.FileName);
-                var modifiedFileName = $"{activeCompetitionSession.Name}_{Competitor.Username}{fileExtension}";
+                var modifiedFileName = $"{activeCompetitionSession.Name}_{Competitor.Username}_{DateTime.Now.ToString("yyyyMMddHHmmss")}{fileExtension}";
                 var zipPath = Path.Combine(folderPath, modifiedFileName);
 
                 try

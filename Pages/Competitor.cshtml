@@ -7,11 +7,11 @@
 <div class="d-flex w-100">
     <div class="row w-100">
         <div class="col-lg-12">
-            <h1>Competitor - @Model.Competitor.Username</h1>
+            <h1>Competitor - @Model.Competitor?.Username</h1>
             <p class="mt-3 text-black-50">Download the test projects here</p>
 
             <form method="post">
-                <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor.ID" required>
+                <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor?.ID" required>
                 <input class="form-control visually-hidden" asp-for="Action" type="text" value="DownloadTP" required>
                 <button class="btn btn-primary" type="submit">
                     <i class="bx bx-download me-2"></i>
@@ -23,7 +23,7 @@
             <form method="post" enctype="multipart/form-data">
                 <div class="d-flex align-items-center">
                     <div class="d-inline-flex flex-grow-1">
-                        <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor.ID" required>
+                        <input class="form-control visually-hidden" asp-for="CompetitorID" type="text" value="@Model.Competitor?.ID" required>
                         <input class="form-control visually-hidden" asp-for="Action" type="text" value="UploadAnswer" required>
                         <input class="form-control me-3" asp-for="UploadedFile" type="file" accept=".zip" required>
                     </div>
@@ -73,7 +73,7 @@
 
                                         @if (competitorUploadedFile != null)
                                         {
-                                            var listExtract = Model.CompetitorAnswerHistory.Where(x => x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID).FirstOrDefault().UploadedFileZipExtractList;
+                                            var listExtract = Model.CompetitorAnswerHistory.Where(x => x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID).First().UploadedFileZipExtractList;
 
                                             <div class="d-flex justify-content-between ms-3 pe-3">
                                                 <span class="d-inline-flex">@competitorUploadedFile.FileName</span>

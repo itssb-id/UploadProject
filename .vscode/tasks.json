@@ -21,7 +21,8 @@
                 "publish",
                 "${workspaceFolder}/UploadProject.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary",
+                "-c=Release"
             ],
             "problemMatcher": "$msCompile"
         },
