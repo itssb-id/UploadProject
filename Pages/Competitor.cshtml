@@ -85,7 +85,7 @@
                                 const dueTime = new Date("@nextSession.StartDateTime");
                                 const countdown = setInterval(() => {
                                     const now = new Date();
-                                    const dist = dueTime - now; 
+                                    const dist = dueTime - now;
                                     if (dist <= 0) {
                                         clearInterval(countdown);
                                         location.reload();
