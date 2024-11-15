@@ -1,9 +1,11 @@
 ﻿@{
     var cookies = Context.Request.Cookies.TryGetValue("UserID", out string? value);
+    var userId = Context.Session.GetString("UserID");
 }
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,13 +17,14 @@
     <link rel="stylesheet" href="~/lib/boxicons-2.1.4/css/boxicons.min.css" />
     @* <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> *@
 </head>
+
 <body class="d-flex flex-column m-0 min-vh-100">
     <header class="d-flex flex-column">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">Upload Project</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="d-flex flex-grow-1 justify-content-between">
@@ -29,7 +32,7 @@
                         <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
                     </div>
                     <div class="d-inline-flex p-1">
-                        @if (!cookies)
+                        @if (string.IsNullOrEmpty(userId))
                         {
                             <a class="nav-link d-flex align-items-center text-primary" asp-page="/Login">
                                 <i class="bx bx-user d-inline-flex me-2"></i>
@@ -61,8 +64,11 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/vue/vue.global.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>
