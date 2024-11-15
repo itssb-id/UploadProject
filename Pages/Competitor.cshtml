@@ -1,4 +1,4 @@
-﻿@page "{competitorID}"
+﻿@page
 @using System.IO.Compression;
 @model UploadProject.Pages.CompetitorModel
 @{
@@ -10,7 +10,7 @@
         <div class="col-lg-12">
             <h1>Competitor - @Model.Competitor?.Username</h1>
             @{
-                var currSession = Model.db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => x.StartDateTime <= DateTime.Now && DateTime.Now <= x.EndDateTime);
+                var currSession = Model._db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => x.StartDateTime <= DateTime.Now && DateTime.Now <= x.EndDateTime);
 
                 if (currSession != null)
                 {
@@ -69,13 +69,11 @@
                 }
                 else
                 {
-                    var nextSession = Model.db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => DateTime.Now <= x.StartDateTime);
+                    var nextSession = Model._db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => DateTime.Now <= x.StartDateTime);
                     if (nextSession != null)
                     {
                         <h2>
-                            Next Session: @(
-                "D" + nextSession.DayNumber
-                    ) @nextSession.Name
+                            Next Session: @("D" + nextSession.DayNumber) @nextSession.Name
                         </h2>
                         <div class="d-flex justify-content-between">
                             <h4>@nextSession.StartDateTime.ToString("dd MMM yyyy HH:mm") - @nextSession.EndDateTime.ToString("dd MMM yyyy HH:mm")</h4>
