@@ -4,27 +4,21 @@ using UploadProject.Data;
 
 namespace UploadProject.Pages;
 
-public class IndexModel : PageModel
+public class IndexModel(ILogger<IndexModel> logger, ApplicationDbContext db) : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
-    private ApplicationDbContext db;
-
-    public IndexModel(ILogger<IndexModel> logger, ApplicationDbContext _db)
-    {
-        _logger = logger;
-        this.db = _db;
-    }
+    private readonly ILogger<IndexModel> _logger = logger;
+    private readonly ApplicationDbContext _db = db;
 
     public IActionResult OnGet()
     {
         var userID = Request.Cookies["UserID"];
 
-        if(userID != null && userID != "")
+        if (!string.IsNullOrEmpty(userID))
         {
-            var user = db.Users.FirstOrDefault(x => x.ID == new Guid(userID));
+            var user = _db.Users.SingleOrDefault(x => x.ID == Guid.Parse(userID));
             if (user != null)
             {
-                if(user.IsAdmin)
+                if (user.IsAdmin)
                 {
                     return Redirect($"/Admin/{user.ID}");
                 }
