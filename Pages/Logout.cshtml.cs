@@ -8,7 +8,8 @@ namespace UploadProject.Pages
     {
         public IActionResult OnGet()
         {
-            Response.Cookies.Delete("UserID");
+            HttpContext.Session.Clear();
+            //Response.Cookies.Delete("UserID");
             return Redirect("/");
         }
     }
