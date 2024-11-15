@@ -1,4 +1,4 @@
-﻿@page "{adminID}"
+﻿@page
 @using System.IO.Compression;
 @model UploadProject.Pages.AdminModel
 @{
@@ -8,26 +8,21 @@
 
 <div class="d-flex flex-column w-100">
     <h1 class="mt-5">Admin</h1>
-
     <div class="d-flex flex-row-reverse bd-highlight">
         <div class="p-2 bd-highlight">
-            <p>
-                <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseTestProjects" role="button" aria-expanded="true" aria-controls="collapseTestProjects">
-                    Test Projects
-                </a>
-            </p>
+            <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseTestProjects" role="button" aria-expanded="true" aria-controls="collapseTestProjects">
+                Test Projects
+            </a>
         </div>
         <div class="p-2 bd-highlight">
-            <p>
-                <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="true" aria-controls="collapseExample">
-                    <i class="bx bx-upload me-2"></i>
-                    Upload Test Project
-                </a>
-            </p>
+            <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="true" aria-controls="collapseExample">
+                <i class="bx bx-upload me-2"></i>
+                Upload Test Project
+            </a>
         </div>
     </div>
 
-    <div class="collapse" id="collapseExample">
+    <div class="collapse my-2" id="collapseExample">
         <form method="post" enctype="multipart/form-data">
             <input class="visually-hidden" type="text" asp-for="AdminID" value="@Model.Admin.ID" />
             <div class="card card-body">
@@ -40,21 +35,21 @@
                 <div class="row align-items-center mt-3">
                     <div class="col">
                         <p>Choose Test Project</p>
-                        <input class="form-control" asp-for="UploadedFile" id="formFileSm" type="file" accept=".zip" required />
+                        <input class="form-control" asp-for="UploadedFile" type="file" accept=".zip" required />
                     </div>
                     <div class="col">
                         <p>Day Number</p>
-                        <input asp-for="DayNumber" class="form-control" id="formFileSm" min="1" type="number" max="10" required />
+                        <input asp-for="DayNumber" class="form-control" min="1" type="number" max="10" required />
                     </div>
                 </div>
                 <div class="row align-items-center mt-3">
                     <div class="col">
                         <p>Start Date</p>
-                        <input asp-for="StartDate" class="form-control" id="formFileSm" type="datetime-local" required />
+                        <input asp-for="StartDate" class="form-control" type="datetime-local" required />
                     </div>
                     <div class="col">
                         <p>End Date</p>
-                        <input asp-for="EndDate" class="form-control" id="formFileSm" type="datetime-local" required />
+                        <input asp-for="EndDate" class="form-control" type="datetime-local" required />
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -69,9 +64,9 @@
         </form>
     </div>
 
-    <div class="collapse mt-3" id="collapseTestProjects">
+    <div class="collapse my-2" id="collapseTestProjects">
         <div class="card card-body">
-            <table class="mt-3 table table-striped table-hover">
+            <table class="my-0 table table-striped table-hover">
                 <thead>
                     <tr>
                         <th scope="col">Test Poject Zip</th>
@@ -101,10 +96,10 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="top-section">
         <div class="card-body">
             @{
-                var data = Model.db.CompetitionSessions.OrderBy(x => x.DayNumber).ThenBy(x => x.StartDateTime).ToList();
+                var data = Model._db.CompetitionSessions.OrderBy(x => x.DayNumber).ThenBy(x => x.StartDateTime).ToList();
                 var hasCurrent = data.Any(x => x.StartDateTime <= DateTime.Now && DateTime.Now <= x.EndDateTime);
                 int loop = 0;
             }
@@ -113,7 +108,7 @@
                 {
                     var isActive = hasCurrent ? (session.StartDateTime <= DateTime.Now && DateTime.Now <= session.EndDateTime) : loop == 0;
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link @(isActive ? "active" : "")" data-bs-toggle="pill" data-bs-target="@("#pills-" + session.Name)" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">@("D" + session.DayNumber) @session.Name</button>
+                        <button class="nav-link @(isActive ? "active" : "")" data-bs-toggle="pill" data-bs-target="@("#pills-" + session.ID.ToString())" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">@("D" + session.DayNumber) @session.Name</button>
                     </li>
                     loop++;
                 }
@@ -125,8 +120,81 @@
                 @foreach (var session in data)
                 {
                     var isActive = hasCurrent ? (session.StartDateTime <= DateTime.Now && DateTime.Now <= session.EndDateTime) : loop == 0;
-                    <div class="tab-pane fade @(isActive ? "show active" : "")" id="@("pills-"+session.Name)" role="tabpanel">
-                        <div>@session.StartDateTime - @session.EndDateTime</div>
+                    <div class="tab-pane fade @(isActive ? "show active" : "")" id="@("pills-" + session.ID.ToString())" role="tabpanel">
+                        <div>
+                            <span>@session.StartDateTime - @session.EndDateTime</span>
+                            <button class="btn btn-outline-secondary my-1 mx-2 btn-sm" data-bs-toggle="modal" data-bs-target="#edit-modal-@session.ID">Edit</button>
+                            <div class="modal fade" id="edit-modal-@session.ID" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <form method="post">
+                                        <input class="visually-hidden" type="text" asp-for="ModuleID" value="@session.ID" />
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel">Edit Time</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row align-items-center mt-3">
+                                                    <div class="col">
+                                                        <p>Start Date</p>
+                                                        <input asp-for="StartDate" class="form-control" type="datetime-local" required value="@session.StartDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                                                    </div>
+                                                    <div class="col">
+                                                        <p>End Date</p>
+                                                        <input asp-for="EndDate" class="form-control" type="datetime-local" required value="@session.EndDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary" name="action" value="editDatetime">Save changes</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @if (DateTime.Now <= session.EndDateTime)
+                        {
+                            <h4 id="timeOut" style="" class="text-center"></h4>
+                            <style>
+                                #timeOut {
+                                    font-size: 70pt;
+                                    font-family: consolas, monospace;
+                                    font-optical-sizing: auto;
+                                    font-weight: 100;
+                                    font-style: normal;
+                                }
+                            </style>
+                            <script type="text/javascript">
+                                const timeout = document.getElementById("timeOut");
+                                const dueTime = new Date("@(DateTime.Now < session.StartDateTime ? session.StartDateTime : session.EndDateTime)");
+                                const needReload = @(DateTime.Now < session.StartDateTime ? "true" : "false");
+                                const countdown = setInterval(() => {
+                                    const now = new Date();
+
+                                    const dist = dueTime - now;
+                                    if (dist <= 0) {
+                                        clearInterval(countdown);
+                                        if (needReload) {
+                                            window.location.reload();
+                                        }
+                                        timeout.innerHTML = "EXPIRED!";
+                                        return;
+                                    }
+                                    //timeout.innerHTML = "" + ;
+
+                                    const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((dist % (1000 * 60)) / 1000).toString();
+                                    const miliseconds = Math.floor(dist % 1000 / 10).toString().padStart(2, 0);
+
+                                    // Display the result in the element with id="demo"
+                                    timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + ":" : ""}${dist > (1000 * 60) ? minutes + ":" : ""}${dist > 10 * 1000 ? seconds.padStart(2, 0) : seconds}.${miliseconds}`;
+                                }, 10)
+                            </script>
+                        }
                         <div class="row">
                             @for (int i = 0; i < 5; i++)
                             {
@@ -134,13 +202,23 @@
                                     <ul class="list-group mt-2">
                                         @foreach (var index in Enumerable.Range(i * 10 + 1, 10))
                                         {
+                                            var username = $"PC{index:00}";
                                             <li class="list-group-item d-flex justify-content-between align-items-start @(index%2==0?"list-group-item-dark" : "")">
-                                                <div>@($"PC{index:00}")</div>
+                                                <div>
+                                                    <a class="text-decoration-none" href="#answer-@username"> @username </a>
+                                                </div>
                                                 @try
                                                 {
-                                                    var upload = Model.db.CompetitorUploadedFiles.OrderByDescending(x => x.CreatedAt).FirstOrDefault(a => a.User.Username == $"PC{index:00}" && a.CompetitionSessionID == session.ID);
-                                                    using var zipfile = ZipFile.OpenRead(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "File", upload.FileName));
-                                                    <span class="badge bg-primary rounded-pill" title="@upload?.CreatedAt">@zipfile.Entries.Count</span>
+                                                    var upload = Model._db.CompetitorUploadedFiles.OrderByDescending(x => x.CreatedAt).FirstOrDefault(a => a.User.Username == $"PC{index:00}" && a.CompetitionSessionID == session.ID);
+                                                    if (upload != null)
+                                                    {
+                                                        using var zipfile = ZipFile.OpenRead(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "File", upload.FileName));
+                                                        <span class="badge bg-primary rounded-pill" title="@upload?.CreatedAt">@zipfile.Entries.Count</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning rounded-pill">0</span>
+                                                    }
                                                 }
                                                 catch (FileNotFoundException)
                                                 {
@@ -160,6 +238,12 @@
                                 </div>
                             }
                         </div>
+                        <div class="mt-3">
+                            <form method="post">
+                                <input class="visually-hidden" type="text" asp-for="ModuleID" value="@session.ID" />
+                                <Button class="btn btn-success w-100" type="submit" name="action" value="downloadAnswer">Download Answer @("D" + session.DayNumber) @session.Name</Button>
+                            </form>
+                        </div>
                     </div>
                     loop++;
                 }
@@ -170,7 +254,7 @@
 
     @foreach (var user in Model.Users)
     {
-        <div class="card mt-3">
+        <div class="card mt-3" id="answer-@user.Username">
             <div class="card-body">
                 <a class="d-flex align-items-center justify-content-between text-decoration-none text-black" data-bs-toggle="collapse" href="#collapseHistory-@(user.ID)" role="button" aria-expanded="true">
                     <h5>@user.Username</h5>
@@ -218,7 +302,7 @@
                                                     x.CompetitionSessionID == competitorUploadedFile.CompetitionSessionID
                                                     &&
                                                     x.UserId == user.ID
-                                                    ).FirstOrDefault().UploadedFileZipExtractList;
+                                                    ).FirstOrDefault()?.UploadedFileZipExtractList;
 
                                                     <div class="d-flex justify-content-between ms-3 pe-3">
                                                         <span class="d-inline-flex">@competitorUploadedFile.FileName</span>
@@ -258,4 +342,24 @@
             alert('@TempData["alertMessage"]');
         </script>
     }
+    <div id="goto-top" style="position:fixed; bottom: 10px; right: 30px;">
+        <a class="btn btn-outline-primary" href="#top-section">Go top</a>
+    </div>
+    <script>
+        const topSection = document.getElementById("top-section"),
+            element = document.getElementById("goto-top"),
+            lastScrollTop = topSection.offsetTop + topSection.offsetHeight;
+        window.addEventListener("scroll", function () {
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScroll > lastScrollTop) {
+                // Scroll ke bawah, tampilkan elemen
+                element.style.display = "block";
+            } else {
+                // Scroll ke atas, sembunyikan elemen
+                element.style.display = "none";
+            }
+        });
+
+    </script>
 </div>

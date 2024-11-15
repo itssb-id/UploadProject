@@ -7,31 +7,32 @@ using UploadProject.ViewModels;
 
 namespace UploadProject.Pages
 {
-    public class AdminModel : PageModel
+    public class AdminModel(ApplicationDbContext db, ILogger<AdminModel> logger) : PageModel
     {
-        public List<string> strings = new();
-        public readonly ApplicationDbContext db;
-        public List<User> Users = new();
-        public List<CompetitionSession> CompetitionSessions = new();
-        public List<CompetitorUploadedFile> CompetitorUploadedFiles = new();
-        public List<CompetitorAnswerHistory> CompetitorAnswerHistory = new();
+        public List<string> strings = [];
+        public readonly ApplicationDbContext _db = db;
+        public List<User> Users = [];
+        public List<CompetitionSession> CompetitionSessions = [];
+        public List<CompetitorUploadedFile> CompetitorUploadedFiles = [];
+        public List<CompetitorAnswerHistory> CompetitorAnswerHistory = [];
+        private readonly ILogger<AdminModel> _logger = logger;
 
         [BindProperty]
         public string SelectedID { get; set; } = "";
 
-        public User Admin;
+        public User? Admin;
         public bool VisibleAlert = true;
 
         [BindProperty]
         public Guid AdminID { get; set; }
         [BindProperty]
-        public IFormFile UploadedFile { get; set; }
+        public IFormFile? UploadedFile { get; set; }
         [BindProperty]
         public DateTime StartDate { get; set; } = DateTime.Now.Date;
         [BindProperty]
         public DateTime EndDate { get; set; } = DateTime.Now.Date;
         [BindProperty]
-        public String SessionName { get; set; }
+        public string SessionName { get; set; } = "";
         [BindProperty]
         public int DayNumber { get; set; } = 1;
 
@@ -41,13 +42,22 @@ namespace UploadProject.Pages
         [BindProperty]
         public string ButtonValue { get; set; } = "add";
 
-        public AdminModel(ApplicationDbContext db)
+        public IActionResult OnGet()
         {
-            this.db = db;
-        }
+            var userID =  HttpContext.Session.GetString("UserID");
+            if (string.IsNullOrEmpty(userID))
+            {
+                return Redirect("/");
+            }
 
-        public void OnGet(Guid adminID)
-        {
+            var id = Guid.Parse(userID!);
+
+            var user = _db.Users.SingleOrDefault(x => x.ID == id);
+
+            if (user != null)
+            {
+                Admin = user;
+            }
             //db.CompetitionSessions.RemoveRange(db.CompetitionSessions.ToList());
             //db.SaveChanges();
 
@@ -57,19 +67,19 @@ namespace UploadProject.Pages
             //db.CompetitorUploadedFiles.RemoveRange(db.CompetitorUploadedFiles.ToList());
             //db.SaveChanges();
 
-            var checkAdmin = db.Users.FirstOrDefault(x => x.ID == adminID);
+            //var checkAdmin = _db.Users.SingleOrDefault(x => x.ID == adminID);
 
-            if (checkAdmin != null)
-            {
-                this.Admin = checkAdmin;
-            }
+            //if (checkAdmin != null)
+            //{
+            //    Admin = checkAdmin;
+            //}
 
 
-            var sessionNow = db.CompetitionSessions.FirstOrDefault(x => x.StartDateTime >= DateTime.Now && x.EndDateTime <= DateTime.Now);
+            var sessionNow = _db.CompetitionSessions.FirstOrDefault(x => x.StartDateTime >= DateTime.Now && x.EndDateTime <= DateTime.Now);
 
-            Users = db.Users.Where(x => !x.IsAdmin).OrderBy(x => x.Username).ToList();
-            CompetitionSessions = db.CompetitionSessions.OrderBy(x => x.StartDateTime).ToList();
-            CompetitorUploadedFiles = db.CompetitorUploadedFiles.ToList();
+            Users = _db.Users.Where(x => !x.IsAdmin).OrderBy(x => x.Username).ToList();
+            CompetitionSessions = _db.CompetitionSessions.OrderBy(x => x.StartDateTime).ToList();
+            CompetitorUploadedFiles = _db.CompetitorUploadedFiles.ToList();
 
             var folderPath = Directory.GetCurrentDirectory() + "/File";
 
@@ -87,9 +97,9 @@ namespace UploadProject.Pages
             //    }
             //}
 
-            this.CompetitionSessions = db.CompetitionSessions.OrderBy(x => x.DayNumber).ToList();
-            this.CompetitorUploadedFiles = db.CompetitorUploadedFiles.ToList();
-            this.CompetitorAnswerHistory = this.CompetitorUploadedFiles.Select((x) =>
+            CompetitionSessions = _db.CompetitionSessions.OrderBy(x => x.DayNumber).ToList();
+            CompetitorUploadedFiles = _db.CompetitorUploadedFiles.ToList();
+            CompetitorAnswerHistory = CompetitorUploadedFiles.Select((x) =>
             {
                 var listExtract = new List<string>();
                 var filePath = Path.Combine(folderPath, x.FileName);
@@ -111,6 +121,7 @@ namespace UploadProject.Pages
                     UploadedFileZipExtractList = listExtract
                 };
             }).OrderByDescending(x => x.CreatedAt).ToList();
+            return Page();
         }
 
         public IActionResult OnPostAsync()
@@ -118,36 +129,51 @@ namespace UploadProject.Pages
             if (StartDate > EndDate)
             {
                 TempData["alertMessage"] = "Start date cannot more than end date";
-                return Redirect("/Admin/" + this.AdminID);
+                return Redirect("/Admin");
             }
 
-            string action = Request.Form["action"];
+            string? action = Request.Form["action"];
             switch (action)
             {
                 case "delete":
-                    var dataDelete = db.CompetitionSessions.FirstOrDefault(x => x.ID == ModuleID);
-                    var dataDeleteAdmin = db.AdminUploadedFiles.Where(x => x.CompetitionSessionID == dataDelete.ID);
-                    db.AdminUploadedFiles.RemoveRange(dataDeleteAdmin);
-                    db.SaveChanges();
-                    db.CompetitionSessions.Remove(dataDelete);
-                    db.SaveChanges();
-                    return Redirect("/Admin/" + this.AdminID);
+                    var dataDelete = _db.CompetitionSessions.FirstOrDefault(x => x.ID == ModuleID);
+                    var dataDeleteAdmin = _db.AdminUploadedFiles.Where(x => x.CompetitionSessionID == dataDelete.ID);
+                    _db.AdminUploadedFiles.RemoveRange(dataDeleteAdmin);
+                    _db.SaveChanges();
+                    _db.CompetitionSessions.Remove(dataDelete);
+                    _db.SaveChanges();
+                    return Redirect("/Admin");
 
                 case "download":
                     var folderPathA = Directory.GetCurrentDirectory() + "/File/TestProjects/";
-                    var a = db.CompetitionSessions.FirstOrDefault(x => x.ID == ModuleID);
-                    var b = db.AdminUploadedFiles.FirstOrDefault(x => x.CompetitionSessionID == a.ID);
+                    var a = _db.CompetitionSessions.FirstOrDefault(x => x.ID == ModuleID);
+                    var b = _db.AdminUploadedFiles.FirstOrDefault(x => x.CompetitionSessionID == a.ID);
                     var filePath = Path.Combine(folderPathA, b.FileName);
                     var fileContentType = "application/zip"; // set the content type to indicate a zip file
                     var compressedFileName = $"{Path.GetFileNameWithoutExtension(filePath)}";
-                    return PhysicalFile(filePath, fileContentType);
+                    if (System.IO.File.Exists(filePath))
+                        return PhysicalFile(filePath, fileContentType, compressedFileName);
+                    else return Redirect("/Admin");
+                // return PhysicalFile(filePath, fileContentType);
+                case "downloadAnswer":
+                    return DownloadAnswer(ModuleID);
+                case "editDatetime":
+                    var dataEdit = _db.CompetitionSessions.FirstOrDefault(x => x.ID == ModuleID);
+                    if(dataEdit == null) return Redirect("/Admin");
+                    _logger.LogInformation("Time {start} {end}", StartDate, EndDate);
+                    dataEdit.StartDateTime = StartDate;
+                    dataEdit.EndDateTime = EndDate;
+                    //dataEdit.Name = SessionName;
+                    //dataEdit.DayNumber = DayNumber;
+                    _db.SaveChanges();
+                    return Redirect("/Admin");
 
             }
 
 
 
             if (!UploadedFile.FileName.Contains(".zip"))
-                return Redirect("/Admin/" + this.AdminID);
+                return Redirect("/Admin");
 
             var folderPath = Directory.GetCurrentDirectory() + "/File/TestProjects";
             if (!Directory.Exists(folderPath))
@@ -163,27 +189,58 @@ namespace UploadProject.Pages
             }
 
             var competitionSessionID = Guid.NewGuid();
-            db.CompetitionSessions.Add(new CompetitionSession
+            _db.CompetitionSessions.Add(new CompetitionSession
             {
                 ID = competitionSessionID,
-                Name = this.SessionName,
-                DayNumber = this.DayNumber,
-                StartDateTime = this.StartDate,
-                EndDateTime = this.EndDate
+                Name = SessionName,
+                DayNumber = DayNumber,
+                StartDateTime = StartDate,
+                EndDateTime = EndDate
             });
-            db.SaveChanges();
+            _db.SaveChanges();
 
-            db.AdminUploadedFiles.Add(new AdminUploadedFile
+            _db.AdminUploadedFiles.Add(new AdminUploadedFile
             {
                 FileName = UploadedFile.FileName,
                 CreatedAt = DateTime.Now,
                 CompetitionSessionID = competitionSessionID,
                 UserID = AdminID,
             });
-            db.SaveChanges();
+            _db.SaveChanges();
 
 
-            return Redirect("/Admin/" + this.AdminID);
+            return Redirect("/Admin");
+        }
+
+        private FileContentResult DownloadAnswer(Guid SessionID)
+        {
+            var pathDir = Path.Combine(Directory.GetCurrentDirectory(), "File");
+            _logger.LogInformation("download answer {sessionId}", ModuleID);
+            var session = _db.CompetitionSessions.SingleOrDefault(x => x.ID == ModuleID);
+            if (session == null) Redirect("/");
+            //var pathFile = Path.Combine(pathDir, session!.Name + ".zip"));
+            using var memoryStream = new MemoryStream();
+            using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
+
+            
+            var filenames = _db
+                .CompetitorUploadedFiles
+                .Where(x => x.CompetitionSessionID == SessionID && x.CreatedAt == _db.CompetitorUploadedFiles.Where(y => y.CompetitionSessionID == SessionID && y.UserID == x.UserID).Max(y => y.CreatedAt))
+                .Select(x => x.FileName).ToList();
+                
+            foreach (var filename in filenames)
+            {
+                var path = Path.Combine(pathDir, filename);
+                if (Path.Exists(path))
+                {
+                    var file = System.IO.File.OpenRead(path);
+                    var zipEntry = archive.CreateEntry(filename, CompressionLevel.Fastest);
+                    using var zipStream = zipEntry.Open();
+                    file.CopyTo(zipStream);
+                }
+            }
+            var fileContentType = "application/zip";
+            return File(memoryStream.ToArray(), fileContentType, session!.Name + ".zip");
         }
     }
 }
