@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UploadProject.Helper;
 using UploadProject.Models;
 
 namespace UploadProject.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext()
     {
@@ -95,11 +94,11 @@ public class ApplicationDbContext : IdentityDbContext
 
     }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User> Users { get; set; } = null!;
 
-    public virtual DbSet<AdminUploadedFile> AdminUploadedFiles { get; set; }
+    public virtual DbSet<AdminUploadedFile> AdminUploadedFiles { get; set; } = null!;
 
-    public virtual DbSet<CompetitorUploadedFile> CompetitorUploadedFiles { get; set; }
+    public virtual DbSet<CompetitorUploadedFile> CompetitorUploadedFiles { get; set; } = null!;
 
-    public virtual DbSet<CompetitionSession> CompetitionSessions { get; set; }
+    public virtual DbSet<CompetitionSession> CompetitionSessions { get; set; } = null!;
 }
