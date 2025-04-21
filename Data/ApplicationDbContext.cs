@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using UploadProject.Helper;
 using UploadProject.Models;
 
@@ -12,6 +13,12 @@ public class ApplicationDbContext : DbContext
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite($"Data Source=app.db");
+        optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,34 +57,34 @@ public class ApplicationDbContext : DbContext
                 });
         }
 
-        var idSessionDesktop = Guid.NewGuid();
-        var idSessionMobile = Guid.NewGuid();
+        //var idSessionDesktop = Guid.NewGuid();
+        //var idSessionMobile = Guid.NewGuid();
 
-        modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
-        { 
-            //ID = idSessionDesktop,
-            DayNumber = 1,
-            Name = "Desktop 1",
-            StartDateTime = new DateTime(2023, 05, 23, 12, 30, 0),
-            EndDateTime = new DateTime(2023, 05, 23, 15, 30, 0)
-        });
+        //modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
+        //{ 
+        //    //ID = idSessionDesktop,
+        //    DayNumber = 1,
+        //    Name = "Desktop 1",
+        //    StartDateTime = new DateTime(2023, 05, 23, 12, 30, 0),
+        //    EndDateTime = new DateTime(2023, 05, 23, 15, 30, 0)
+        //});
 
-        modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
-        {
-            DayNumber = 2,
-            Name = "Desktop 2",
-            StartDateTime = new DateTime(2023, 05, 24, 8, 30, 0),
-            EndDateTime = new DateTime(2023, 05, 24, 11, 0, 0)
-        }); 
+        //modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
+        //{
+        //    DayNumber = 2,
+        //    Name = "Desktop 2",
+        //    StartDateTime = new DateTime(2023, 05, 24, 8, 30, 0),
+        //    EndDateTime = new DateTime(2023, 05, 24, 11, 0, 0)
+        //}); 
 
-        modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
-        {
-            //ID = idSessionMobile,
-            DayNumber = 2,
-            Name = "Android",
-            StartDateTime = new DateTime(2023, 05, 24, 12, 00, 00),
-            EndDateTime = new DateTime(2023, 05, 24, 16, 00, 00)
-        });
+        //modelBuilder.Entity<CompetitionSession>().HasData(new CompetitionSession
+        //{
+        //    //ID = idSessionMobile,
+        //    DayNumber = 2,
+        //    Name = "Android",
+        //    StartDateTime = new DateTime(2023, 05, 24, 12, 00, 00),
+        //    EndDateTime = new DateTime(2023, 05, 24, 16, 00, 00)
+        //});
 
         //modelBuilder.Entity<CompetitorUploadedFile>().HasData(
         //    new CompetitorUploadedFile

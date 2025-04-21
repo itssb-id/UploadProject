@@ -19,7 +19,7 @@ namespace UploadProject.Pages
         [BindProperty]
         public string Action { get; set; } = string.Empty;
 
-        public User? Competitor;
+        public Models.User? Competitor;
         public List<CompetitionSession> CompetitionSessions = [];
         public List<CompetitorUploadedFile> CompetitorUploadedFiles = [];
         public List<CompetitorAnswerHistory> CompetitorAnswerHistory = [];
@@ -124,7 +124,7 @@ namespace UploadProject.Pages
                 if (allActiveCompetitionSessions.Count == 0)
                 {
                     TempData["ErrorMessage"] = "There are no active competition sessions";
-                    return Redirect("/Competitor/" + Competitor.ID);
+                    return Redirect("/Competitor");
                 }
 
                 using var memoryStream = new MemoryStream();
@@ -162,7 +162,7 @@ namespace UploadProject.Pages
                 if (checkActiveCompetitionSession.Count == 0)
                 {
                     TempData["ErrorMessage"] = "There are no active competition sessions";
-                    return Redirect("/Competitor/" + Competitor.ID);
+                    return Redirect("/Competitor");
                 }
 
                 var activeCompetitionSession = checkActiveCompetitionSession.FirstOrDefault();
@@ -170,7 +170,7 @@ namespace UploadProject.Pages
                 if (activeCompetitionSession == null)
                 {
                     TempData["ErrorMessage"] = "There are no active competition sessions";
-                    return Redirect("/Competitor/" + Competitor.ID);
+                    return Redirect("/Competitor");
                 }
 
                 var activeCompetitionSessionID = activeCompetitionSession.ID;
@@ -187,7 +187,7 @@ namespace UploadProject.Pages
                 catch (Exception)
                 {
                     TempData["ErrorMessage"] = "Error upload.";
-                    return Redirect("/Competitor/" + Competitor.ID);
+                    return Redirect("/Competitor");
                 }
 
                 _db.CompetitorUploadedFiles.Add(new CompetitorUploadedFile
@@ -210,7 +210,7 @@ namespace UploadProject.Pages
                 //Console.WriteLine(Competitor.ID.ToString());
             }
 
-            return Redirect("/Competitor/" + Competitor.ID);
+            return Redirect("/Competitor");
         }
 
         //public async Task<IActionResult> OnPostAsync()

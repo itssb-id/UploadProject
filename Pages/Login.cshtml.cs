@@ -35,11 +35,11 @@ namespace UploadProject.Pages
                 {
                     if (user.IsAdmin)
                     {
-                        return Redirect($"/Admin/{user.ID}");
+                        return Redirect($"/Admin");
                     }
                     else
                     {
-                        return Redirect($"/Competitor/{user.ID}");
+                        return Redirect($"/Competitor");
                     }
                 }
             }
@@ -78,7 +78,7 @@ namespace UploadProject.Pages
             }
             else
             {
-                return Redirect($"/Competitor/{user.ID}");
+                return Redirect($"/Competitor");
             }
         }
     }

@@ -20,7 +20,7 @@
                         <h4 id="timeOut"></h4>
                         <script type="text/javascript">
                             const timeout = document.getElementById("timeOut");
-                            const dueTime = new Date("@currSession.EndDateTime");
+                            const dueTime = new Date("@currSession.EndDateTime.ToString("yyyy-MM-dd HH:mm:ss")");
                             const countdown = setInterval(() => {
                                 const now = new Date();
 

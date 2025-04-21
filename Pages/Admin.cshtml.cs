@@ -11,7 +11,7 @@ namespace UploadProject.Pages
     {
         public List<string> strings = [];
         public readonly ApplicationDbContext _db = db;
-        public List<User> Users = [];
+        public List<Models.User> Users = [];
         public List<CompetitionSession> CompetitionSessions = [];
         public List<CompetitorUploadedFile> CompetitorUploadedFiles = [];
         public List<CompetitorAnswerHistory> CompetitorAnswerHistory = [];
@@ -20,7 +20,7 @@ namespace UploadProject.Pages
         [BindProperty]
         public string SelectedID { get; set; } = "";
 
-        public User? Admin;
+        public Models.User? Admin;
         public bool VisibleAlert = true;
 
         [BindProperty]
