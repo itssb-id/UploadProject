@@ -165,7 +165,7 @@
                             </style>
                             <script type="text/javascript">
                                 const timeout = document.getElementById("timeOut");
-                                const dueTime = new Date("@((DateTime.Now < session.StartDateTime ? session.StartDateTime : session.EndDateTime).ToString("yyyy-MM-dd HH:mm:ss"))");
+                                const dueTime = new Date("@((DateTime.Now < session.StartDateTime ? session.StartDateTime : session.EndDateTime).ToString("yyyy-MM-ddTHH:mm:sszzz"))");
                                 const needReload = @(DateTime.Now < session.StartDateTime ? "true" : "false");
                                 const countdown = setInterval(() => {
                                     const now = new Date();
