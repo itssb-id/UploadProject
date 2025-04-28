@@ -24,22 +24,23 @@ namespace UploadProject.Pages
         private readonly ILogger<LoginModel> _logger = logger;
 
         //
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
-            var userID = Request.Cookies["UserID"];
+            var userID = HttpContext.Session.GetString("UserID");
+            _logger.LogInformation("UserID: {userId}", userID);
 
             if (!string.IsNullOrEmpty(userID))
             {
-                var user = _db.Users.SingleOrDefault(x => x.ID == Guid.Parse(userID));
+                var user = await _db.Users.SingleOrDefaultAsync(x => x.ID == Guid.Parse(userID));
                 if (user != null)
                 {
                     if (user.IsAdmin)
                     {
-                        return Redirect($"/Admin");
+                        return RedirectToPage("./Admin");
                     }
                     else
                     {
-                        return Redirect($"/Competitor");
+                        return RedirectToPage("./Competitor");
                     }
                 }
             }
@@ -68,7 +69,8 @@ namespace UploadProject.Pages
             // Response.Cookies.Append("UserID", user.ID.ToString());
             _logger.LogInformation("UserID: {userId}", user.ID);
             HttpContext.Session.SetString("UserID", user.ID.ToString());
-            
+            HttpContext.Session.SetString("Role", user.IsAdmin ? "Admin" : "Competitor");
+
             //await _signInManager.SignInAsync(new IdentityUser(user.Username), true);
 
 

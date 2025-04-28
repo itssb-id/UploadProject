@@ -9,9 +9,42 @@
     <div class="row w-100">
         <div class="col-lg-12">
             <h1>Competitor - @Model.Competitor?.Username</h1>
+            <script type="text/javascript">
+                function start(elementId, due, needReload = false){
+                    const timeout = document.getElementById(elementId);
+                    const dueTime = new Date(due);
+                    let countdown = null;
+                    const tick = () => {
+                        const date = new Date();
+                        const now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(),
+                            date.getUTCDate(), date.getUTCHours(),
+                            date.getUTCMinutes(), date.getUTCSeconds());
+                        const now = new Date(now_utc);
+
+                        // console.log("time", {dueTime, now});
+
+                        const dist = dueTime - now;
+                        if (dist <= 0 && countdown) {
+                            clearInterval(countdown);
+                            if (needReload) window.location.reload();
+                            timeout.innerHTML = "EXPIRED!";
+                            return;
+                        }
+
+                        const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+
+                        // Display the result in the element with id="demo"
+                        timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + "h " : ""}${dist > (1000 * 60) ? minutes + "m " : ""}${seconds}s`;
+                    };
+                    tick();
+                    countdown = setInterval(tick, 1000);
+                };
+            </script>
             @{
                 var currSession = Model._db.CompetitionSessions.OrderBy(x => x.StartDateTime).FirstOrDefault(x => x.StartDateTime <= DateTime.Now && DateTime.Now <= x.EndDateTime);
-
                 if (currSession != null)
                 {
                     <h2>Current Session: @("D" + currSession.DayNumber) @currSession.Name</h2>
@@ -19,27 +52,7 @@
                         <h4>@currSession.StartDateTime.ToString("dd MMM yyyy HH:mm") - @currSession.EndDateTime.ToString("dd MMM yyyy HH:mm")</h4>
                         <h4 id="timeOut"></h4>
                         <script type="text/javascript">
-                            const timeout = document.getElementById("timeOut");
-                            const dueTime = new Date("@currSession.EndDateTime.ToString("yyyy-MM-dd HH:mm:ss")");
-                            const countdown = setInterval(() => {
-                                const now = new Date();
-
-                                const dist = dueTime - now;
-                                if (dist <= 0) {
-                                    clearInterval(countdown);
-                                    timeout.innerHTML = "EXPIRED!";
-                                    return;
-                                }
-                                //timeout.innerHTML = "" + ;
-
-                                const days = Math.floor(dist / (1000 * 60 * 60 * 24));
-                                const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-                                const seconds = Math.floor((dist % (1000 * 60)) / 1000);
-
-                                // Display the result in the element with id="demo"
-                                timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + "h " : ""}${dist > (1000 * 60) ? minutes + "m " : ""}${seconds}s`;
-                            }, 1000)
+                            start("timeOut", "@currSession.EndDateTime.ToUniversalTime() GMT");
                         </script>
                     </div>
                     <p class="mt-3 text-black-50">Download the test projects here</p>
@@ -79,25 +92,7 @@
                             <h4>@nextSession.StartDateTime.ToString("dd MMM yyyy HH:mm") - @nextSession.EndDateTime.ToString("dd MMM yyyy HH:mm")</h4>
                             <h4 id="timeOutNext"></h4>
                             <script type="text/javascript">
-                                const timeout = document.getElementById("timeOutNext");
-                                const dueTime = new Date("@nextSession.StartDateTime.ToString("yyyy-MM-dd HH:mm:ss")");
-                                const countdown = setInterval(() => {
-                                    const now = new Date();
-                                    const dist = dueTime - now;
-                                    if (dist <= 0) {
-                                        clearInterval(countdown);
-                                        location.reload();
-                                        return;
-                                    }
-
-                                    const days = Math.floor(dist / (1000 * 60 * 60 * 24));
-                                    const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                    const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-                                    const seconds = Math.floor((dist % (1000 * 60)) / 1000);
-
-                                    // Display the result in the element with id="demo"
-                                    timeout.innerHTML = `${dist > (1000 * 60 * 60 * 24) ? (days + "d ") : ""}${dist > (1000 * 60 * 60) ? hours + "h " : ""}${dist > (1000 * 60) ? minutes + "m " : ""}${seconds}s`;
-                                }, 1000)
+                                start("timeOutNext", "@nextSession.StartDateTime.ToUniversalTime() GMT", true);
                             </script>
                         </div>
                     }
