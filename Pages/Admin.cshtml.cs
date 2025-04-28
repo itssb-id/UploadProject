@@ -159,28 +159,31 @@ public class AdminModel(ApplicationDbContext db, ILogger<AdminModel> logger) : P
             return RedirectToPage();
         }
         //var pathFile = Path.Combine(pathDir, session!.Name + ".zip"));
-        using var memoryStream = new MemoryStream();
-        using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
-
-        var filenames = await _db
-            .CompetitorUploadedFiles
-            .Where(x => x.CompetitionSessionID == id && x.CreatedAt == _db.CompetitorUploadedFiles.Where(y => y.CompetitionSessionID == id && y.UserID == x.UserID).Max(y => y.CreatedAt))
-            .Select(x => x.FileName)
-            .ToListAsync();
-
-        foreach (var filename in filenames)
+        using (var memoryStream = new MemoryStream())
         {
-            var path = Path.Combine(pathDir, filename);
-            if (Path.Exists(path))
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
             {
-                var file = System.IO.File.OpenRead(path);
-                var zipEntry = archive.CreateEntry(filename, CompressionLevel.Fastest);
-                using var zipStream = zipEntry.Open();
-                file.CopyTo(zipStream);
+                var filenames = await _db
+                .CompetitorUploadedFiles
+                .Where(x => x.CompetitionSessionID == id && x.CreatedAt == _db.CompetitorUploadedFiles.Where(y => y.CompetitionSessionID == id && y.UserID == x.UserID).Max(y => y.CreatedAt))
+                .Select(x => x.FileName)
+                .ToListAsync();
+
+                foreach (var filename in filenames)
+                {
+                    var path = Path.Combine(pathDir, filename);
+                    if (Path.Exists(path))
+                    {
+                        var file = System.IO.File.OpenRead(path);
+                        var zipEntry = archive.CreateEntry(filename, CompressionLevel.Fastest);
+                        using var zipStream = zipEntry.Open();
+                        file.CopyTo(zipStream);
+                    }
+                }
+                var fileContentType = "application/zip";
+                return File(memoryStream.ToArray(), fileContentType, $"{CompetitionSession.Name}_{DateTime.Now.ToFileTime()}.zip");
             }
         }
-        var fileContentType = "application/zip";
-        return File(memoryStream.ToArray(), fileContentType, $"{CompetitionSession.Name}_{DateTime.Now.ToFileTime()}.zip");
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(Guid id)
