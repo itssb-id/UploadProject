@@ -127,25 +127,27 @@ public class CompetitorModel(ApplicationDbContext db) : PageModel
                 return RedirectToPage();
             }
 
-            using var memoryStream = new MemoryStream();
-            using var downloadZip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true);
-            
-            foreach (var competitionSession in allActiveCompetitionSessions)
+            using(var memoryStream = new MemoryStream())
             {
-                var testProject = _db.AdminUploadedFiles.Where(x => x.CompetitionSessionID == competitionSession.ID).ToList();
-                foreach (var item in testProject)
+                using (var downloadZip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    var zipPath = Path.Combine(Directory.GetCurrentDirectory(), "File", "TestProjects", item.FileName);
+                    foreach (var competitionSession in allActiveCompetitionSessions)
+                    {
+                        var testProject = _db.AdminUploadedFiles.Where(x => x.CompetitionSessionID == competitionSession.ID).ToList();
+                        foreach (var item in testProject)
+                        {
+                            var zipPath = Path.Combine(Directory.GetCurrentDirectory(), "File", "TestProjects", item.FileName);
 
-                    var entry = downloadZip.CreateEntry(item.FileName);
-                    using var fileStream = System.IO.File.OpenRead(zipPath);
-                    using var entryStream = entry.Open();
-                    fileStream.CopyTo(entryStream);
+                            var entry = downloadZip.CreateEntry(item.FileName);
+                            using var fileStream = System.IO.File.OpenRead(zipPath);
+                            using var entryStream = entry.Open();
+                            fileStream.CopyTo(entryStream);
+                        }
+                    }
                 }
-            }
-            
 
-            return File(memoryStream.ToArray(), "application/zip", $"TP-{DateTime.Now:yyyy-MM-dd_HH:mm:ss}.zip");
+                return File(memoryStream.ToArray(), "application/zip", $"TP-{DateTime.Now:yyyy-MM-dd_HH_mm_ss}.zip");
+            }
         }
         else if (Action == "UploadAnswer")
         {
