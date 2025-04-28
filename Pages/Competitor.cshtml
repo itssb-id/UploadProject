@@ -80,7 +80,7 @@
                             <h4 id="timeOutNext"></h4>
                             <script type="text/javascript">
                                 const timeout = document.getElementById("timeOutNext");
-                                const dueTime = new Date("@nextSession.StartDateTime");
+                                const dueTime = new Date("@nextSession.StartDateTime.ToString("yyyy-MM-dd HH:mm:ss")");
                                 const countdown = setInterval(() => {
                                     const now = new Date();
                                     const dist = dueTime - now;
