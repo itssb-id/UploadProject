@@ -7,7 +7,7 @@ namespace UploadProject.Models
         [Key]
         public Guid ID { get; set; } = Guid.NewGuid();
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public int DayNumber { get; set; }
 
@@ -15,6 +15,6 @@ namespace UploadProject.Models
 
         public DateTime EndDateTime { get; set; }
 
-        public virtual List<User> Competitors { get; set; }
+        public virtual List<User> Competitors { get; set; } = [];
     }
 }

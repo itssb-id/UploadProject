@@ -16,14 +16,14 @@ public class AddUserModel : PageModel
     [BindProperty]
     public string Password { get; set; } = string.Empty;
 
-    private readonly ILogger<User> logger;
+    private readonly ILogger<AddUserModel> logger;
 
     private ApplicationDbContext db;
 
-    public AddUserModel(ILogger<User> _logger, ApplicationDbContext _db)
+    public AddUserModel(ILogger<AddUserModel> _logger, ApplicationDbContext _db)
     {
-        this.logger = _logger;
-        this.db = _db;
+        logger = _logger;
+        db = _db;
     }
 
     public void OnGet()

@@ -1,6 +1,7 @@
 ﻿@{
     var cookies = Context.Request.Cookies.TryGetValue("UserID", out string? value);
     var userId = Context.Session.GetString("UserID");
+    var role = Context.Session.GetString("Role") ?? "";
 }
 
 <!DOCTYPE html>
@@ -30,6 +31,15 @@
                 <div class="d-flex flex-grow-1 justify-content-between">
                     <div class="d-inline-flex p-1">
                         <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        @if (role == "Admin")
+                        {
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Admin">Admin</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/User/Index">Users</a>
+                        }
+                        else if (role == "Competitor")
+                        {
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Competitor">Competitor</a>
+                        }
                     </div>
                     <div class="d-inline-flex p-1">
                         @if (string.IsNullOrEmpty(userId))
@@ -57,8 +67,11 @@
 
     <footer class="d-flex border-top py-3 text-muted">
         <div class="container">
-            &copy; @DateTime.Now.Year - Upload Project </a>
+            <div>
+                &copy; @DateTime.Now.Year - Upload Project
+            </div>
             <!-- - <a asp-area="" asp-page="/Privacy">Privacy -->
+            <!-- <div><button class="btn btn-outline-secondary" onclick="askPermission()">Ask Permission</button></div> -->
         </div>
     </footer>
 
@@ -66,6 +79,25 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/vue/vue.global.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        function askPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    console.log("Izin notifikasi diberikan.");
+                } else {
+                    console.log("Izin notifikasi ditolak.");
+                }
+            }).catch(console.log);
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM fully loaded and parsed", { 'p': Notification.permission});
+            if (Notification.permission === "granted") {
+                console.log("Notifikasi sudah diizinkan.");
+            } else if (Notification.permission === "default" || Notification.permission === "denied") {
+                askPermission();
+            }
+        });
+    </script>
 
 
     @await RenderSectionAsync("Scripts", required: false)
