@@ -180,9 +180,10 @@ public class AdminModel(ApplicationDbContext db, ILogger<AdminModel> logger) : P
                         file.CopyTo(zipStream);
                     }
                 }
-                var fileContentType = "application/zip";
-                return File(memoryStream.ToArray(), fileContentType, $"{CompetitionSession.Name}_{DateTime.Now.ToFileTime()}.zip");
             }
+
+            var fileContentType = "application/zip";
+            return File(memoryStream.ToArray(), fileContentType, $"{CompetitionSession.Name}_{DateTime.Now.ToFileTime()}.zip");
         }
     }
 
